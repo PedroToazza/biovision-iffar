@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biovision IFFar</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+
+  <!-- Manifesto do PWA -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+
+  <!-- Ícones -->
+  <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-512.png">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Logo -->
+    <div class="logo-wrapper">
+      <img src="/static/icons/logo_app.png" alt="Logo Biovision">
+    </div>
+
+    <!-- Container principal -->
+    <div class="container">
+      <h3>Escolha uma imagem para classificar:</h3>
+
+      <!-- Selecionar da galeria -->
+      <form id="formGaleria" enctype="multipart/form-data">
+        <input type="file" name="imagem" id="imagem" accept="image/*" style="display:none;" onchange="mostrarImagem(this)">
+        <button type="button" onclick="document.getElementById('imagem').click()">Selecionar imagem</button>
+      </form>
+
+      <!-- Preview -->
+      <div id="imagemPreview" style="display:none;">
+        <h3>Imagem Selecionada:</h3>
+        <img id="previewImagem" src="" alt="Imagem da Espécie" style="max-width:70%;"/>
+      </div>
+
+      <!-- Resultado -->
+      <div id="resultado"></div>
+    </div>
+
+    <!-- Caixa de instrução de instalação (Android + iOS) -->
+    <div id="installInstructions" style="display:none; margin-top:20px; padding:15px; border:2px solid #4CAF50; border-radius:8px; background:#f0fff0; text-align:center;">
+      <p>📲 Para instalar o aplicativo:</p>
+      <p>1. Toque em <b>Compartilhar</b> <span style="font-size:18px;">⬆️</span></p>
+      <p>2. Escolha <b>Adicionar à Tela de Início</b></p>
+    </div>
+  </div>
+
+  <!-- Modal de zoom -->
+  <div id="zoomModal" class="zoom-modal">
+    <div class="zoom-content" id="zoomContent"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/app.js"></script>
+
+  <script>
+    // Registrar o Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(reg => console.log("Service Worker registrado:", reg))
+        .catch(err => console.error("Erro ao registrar Service Worker:", err));
+    }
+
+    // Mostrar instruções de instalação (iOS + Android simplificado)
+    const installInstructions = document.getElementById("installInstructions");
+    const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    const isInStandalone = window.navigator.standalone === true;
+
+    if ((isIOS && !isInStandalone) || (!isIOS && !window.matchMedia('(display-mode: standalone)').matches)) {
+      installInstructions.style.display = "block";
+    }
+
+    // Sempre começar no topo ao carregar/recarregar a página
+    window.onbeforeunload = function () {
+      window.scrollTo(0, 0);
+    };
+
+    window.addEventListener("load", () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    });
+  </script>
+</body>
+</html>
