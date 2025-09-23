@@ -7,23 +7,11 @@ from PIL import Image
 import io
 import base64
 import mysql.connector  # 👈 para conectar ao MySQL
-import requests
 
 # --- CONFIGURAÇÕES ---
 base_dir = os.path.dirname(os.path.abspath(__file__))
+caminho_modelo = os.path.join(base_dir, "modelo_01.keras")
 caminho_classes_json = os.path.join(base_dir, "class_index_corrigido.json")
-
-def baixar_modelo_se_nao_existir():
-    caminho_modelo = os.path.join(base_dir, "modelo_01.keras")
-    if not os.path.exists(caminho_modelo):
-        print("🔽 Baixando modelo...")
-        # ⬇️ COLE AQUI O LINK DIRETO DO GOOGLE DRIVE, DROPBOX ETC.
-        url = "https://drive.google.com/uc?export=download&id=1RcAtBBqQ6J22fWqK_vqnX5tI5mSGRjTM"
-        resposta = requests.get(url)
-        with open(caminho_modelo, "wb") as f:
-            f.write(resposta.content)
-        print("✅ Modelo baixado!")
-    return caminho_modelo
 
 # Inicializar Flask
 app = Flask(__name__)
@@ -68,9 +56,6 @@ def carregar_nomes_classes(caminho_json):
     except FileNotFoundError:
         return None
 
-# 🔽 Baixar modelo automaticamente, se necessário
-caminho_modelo = baixar_modelo_se_nao_existir()
-
 # Carregar modelo treinado
 try:
     modelo = load_model(caminho_modelo)
@@ -111,6 +96,9 @@ def classificar():
     img_array = carregar_e_preparar_imagem(imagem_bytes)
 
     # Fazer predição
+    if modelo is None:
+        return jsonify({"erro": "Modelo não carregado"}), 500
+
     predicao = modelo.predict(img_array)
     classe_predita_idx = np.argmax(predicao)
     confianca = float(np.max(predicao) * 100)
@@ -134,9 +122,9 @@ def classificar():
     })
 
 # 🔹 Rota para o service worker
-@app.route('/service-worker.js')
+@app.route("/service-worker.js")
 def service_worker():
-    return app.send_static_file('service-worker.js')
+    return app.send_static_file("service-worker.js")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
