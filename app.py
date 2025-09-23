@@ -18,11 +18,14 @@ app = Flask(__name__)
 
 # Configuração do banco (substitua pelos dados do Railway se necessário)
 db_config = {
-    "host": "localhost",       
-    "user": "root",            
-    "password": "Jvt16pht",    
-    "database": "biovision_especie"  
+    "host": "localhost",
+     # lembre de converter para int
+    "user": "root",
+    "password": "Jvt16pht",
+    "database": "biovision_especie"
 }
+
+
 
 def buscar_informacoes_especie(nome_especie):
     """Busca todas as informações da espécie no MySQL"""
