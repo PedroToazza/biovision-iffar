@@ -57,9 +57,14 @@ button {
     border-radius: 8px;
     font-size: 1.2em;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.3s ease;
+    transition: transform 0.2s ease, background 0.3s ease, opacity 0.2s ease;
     width: 100%;
     margin-top: 15px;
+    
+}
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* Efeito ao clicar */
@@ -68,18 +73,11 @@ button:hover {
     background: linear-gradient(135deg, #43a047, #1b5e20);
 }
 
-/* Estilo do vídeo da câmera */
-#formCamera {
-    display: block;
-}
-
 /* Estilo da imagem capturada ou selecionada */
 #imagemPreview {
     margin-top: 20px;
     display: none;
 }
-
-/* Imagem de preview (selecionada pelo usuário) */
 #previewImagem {
     max-width: 70%;
     border-radius: 8px;
@@ -87,35 +85,80 @@ button:hover {
     display: block;
 }
 
-/* Ajustes de responsividade para telas menores */
+/* Loading spinner */
+.loading {
+    display: none;
+    margin-top: 18px;
+    text-align: center;
+}
+.loading p {
+    margin-top: 10px;
+    color: #4CAF50;
+    font-weight: 600;
+}
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(76,175,80,0.25);
+    border-top-color: #4CAF50;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Cards + animação de entrada suave */
+.card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 15px;
+    margin: 15px 0;
+    text-align: left;
+}
+.card ul {
+    list-style-position: inside;
+    padding-left: 0;
+    margin: 10px 0;
+}
+.card li {
+    margin: 5px 0;
+    line-height: 1.4em;
+}
+
+/* animação de entrada */
+.card-animate {
+    opacity: 0;
+    transform: translateY(18px);
+    will-change: opacity, transform;
+    animation: cardIn .8s ease-out forwards;
+}
+@keyframes cardIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+/* respeita usuários com redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+    .card-animate { animation: none; opacity: 1; transform: none; }
+}
+
+/* Imagens do resultado */
+.result-img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Ajustes mobile */
 @media (max-width: 600px) {
-    body {
-        padding: 5px;
-    }
-
-    h1 {
-        font-size: 1.5em;
-    }
-
-    button {
-        width: 100%;
-        font-size: 1.2em;
-        padding: 15px;
-    }
-
-    #formCamera {
-        width: 100%;
-    }
-
-    #previewImagem {
-        width: 100%;
-    }
-
-    /* Ajusta a altura do vídeo para caber na tela */
-    #video {
-        width: 100%;
-        height: auto;
-    }
+    body { padding: 5px; }
+    h1 { font-size: 1.5em; }
+    button { width: 100%; font-size: 1.2em; padding: 15px; }
+    #previewImagem { width: 100%; }
+    .card { padding: 12px; margin: 10px 0; }
+    h2, h3 { font-size: 1.2em; }
+    p { font-size: 1em; }
 }
 
 /* Estilo para links */
@@ -130,108 +173,22 @@ a {
     font-size: 1em;
     transition: background-color 0.3s ease;
 }
+a:hover { background-color: #1976D2; }
 
-a:hover {
-    background-color: #1976D2;
-}
-
-.card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    padding: 15px;
-    margin: 15px 0;
-    text-align: left;
-}
-
-/* Imagens do resultado */
-.result-img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-top: 10px;
-}
-
-/* Ajustes mobile */
-@media (max-width: 600px) {
-    .card {
-        padding: 12px;
-        margin: 10px 0;
-    }
-
-    h2, h3 {
-        font-size: 1.2em;
-    }
-
-    p {
-        font-size: 1em;
-    }
-}
-/* Ajuste da lista dentro dos cards */
-.card ul {
-    list-style-position: inside; /* mantém as bolinhas dentro do card */
-    padding-left: 0;             /* remove o recuo extra */
-    margin: 10px 0;
-}
-
-.card li {
-    margin: 5px 0;
-    line-height: 1.4em;
-}
-
-/* Botão de instalar PWA */
-#installBtn {
-    display: none; /* aparece só quando o evento beforeinstallprompt estiver disponível */
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #4CAF50, #2E7D32);
-    color: #fff;
-    font-size: 1.8em;
-    border: none;
-    border-radius: 50%;  /* formato circular */
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Efeito de toque */
-#installBtn:hover,
-#installBtn:active {
-    background: linear-gradient(135deg, #43A047, #1B5E20);
-    transform: scale(1.1);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-}
-
-/* Ajuste para telas pequenas */
-@media (max-width: 600px) {
-    #installBtn {
-        font-size: 1.1em;
-        padding: 15px 25px;
-    }
-}
+/* App wrapper / logo */
 .app-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
 }
-
-/* Logo */
 .logo-wrapper {
-    margin: 5px 0 15px 0;  /* 🔹 quase colada no topo */
+    margin: 5px 0 15px 0;
     display: flex;
     justify-content: center;
 }
-
 .logo-wrapper .logo-img {
-    max-width: 20px;  /* 🔹 menor que antes */
+    width: clamp(100px, 28vw, 180px); /* mínimo 96px, cresce até 160px */
     height: auto;
     object-fit: contain;
     border-radius: 0;
@@ -239,25 +196,13 @@ a:hover {
     background: none;
 }
 
-/* Container continua normal */
-.container {
-    width: 90%;
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    text-align: center;
-    margin-bottom: 20px;
-}
 
 /* Modal de zoom */
 .zoom-modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(8px);
     justify-content: center;
@@ -266,8 +211,6 @@ a:hover {
     padding: 20px;
     animation: fadeIn 0.3s ease;
 }
-
-/* Card dentro do zoom */
 .zoom-content {
     background: #fff;
     border-radius: 16px;
@@ -278,19 +221,9 @@ a:hover {
     box-shadow: 0 8px 25px rgba(0,0,0,0.35);
     animation: zoomIn 0.3s ease;
 }
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* animações */
-@keyframes zoomIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-/* Botão fechar estilizado */
 .zoom-content .zoom-close {
     position: sticky;
     top: 0;
@@ -304,28 +237,20 @@ a:hover {
     padding: 4px 8px;
     transition: color 0.2s ease;
 }
+.zoom-content .zoom-close:hover { color: #e53935; }
 
-.zoom-content .zoom-close:hover {
-    color: #e53935;
-}
-
-/* Melhor visual para títulos no modal */
 .zoom-content h3,
 .zoom-content h2 {
     color: #4CAF50;
     margin-bottom: 12px;
     font-weight: 600;
 }
-
-/* Texto do card */
 .zoom-content p,
 .zoom-content li {
     font-size: 1.05em;
     line-height: 1.5em;
     color: #333;
 }
-
-/* Imagens maiores no zoom */
 .zoom-content img {
     width: 100%;
     max-height: 300px;
@@ -336,8 +261,383 @@ a:hover {
 
 /* Imagens vindas do banco (resultados) */
 .result-img {
-    max-width: 70%;   /* 🔹 mesmo tamanho do preview */
+    max-width: 70%;
     border-radius: 8px;
     margin: 20px auto;
     display: block;
+}
+
+
+/* Caixa dos botões + preview: mantém altura estável */
+.upload-box {
+  width: 100%;
+  /* altura “maior” e responsiva: nunca menor que 320px, pode crescer até 460px */
+  min-height: clamp(320px, 48vh, 460px);
+  padding: 16px;
+  
+  /* layout agradável mantendo sua identidade visual */
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* deixa espaço reservado para o preview */
+  gap: 12px;
+}
+
+/* O preview não faz a caixa crescer além do necessário */
+#imagemPreview {
+  width: 100%;
+  display: none; /* vira block no JS quando houver imagem */
+}
+
+
+#previewImagem {
+  max-width: 70%;
+  max-height: 240px;   /* 🔸 limita a altura para não estourar a caixa */
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  margin: 10px auto 0 auto;
+  display: block;
+}
+
+/* Em telas pequenas, reserve um pouco menos e ajuste o preview */
+@media (max-width: 600px) {
+  .upload-box {
+    min-height: 340px;
+    padding: 12px;
+  }
+  #previewImagem {
+    max-width: 100%;
+    max-height: 200px;
+  }
+}
+
+.pred-bars li { margin: 8px 0; }
+.prog { height: 8px; background: #e9ecef; border-radius: 6px; overflow: hidden; }
+.prog > span { display: block; height: 100%; background: linear-gradient(135deg,#4CAF50,#2e7d32); width: 0; transition: width 0.8s ease; }
+
+/* === Tema (claro/escuro) com CSS variables === */
+:root {
+  --bg: #f4f4f4;
+  --text: #333;
+  --card-bg: #ffffff;
+  --card-border: rgba(0,0,0,0.06);
+  --shadow: 0 2px 6px rgba(0,0,0,0.1);
+  --accent: #4CAF50;
+  --accent-2: #2e7d32;
+  --link-bg: #2196F3;
+  --link-bg-hover: #1976D2;
+  --overlay: rgba(0,0,0,0.6);
+}
+
+[data-theme="dark"] {
+  --bg: #0f1115;
+  --text: #e6e6e6;
+  --card-bg: #1b1f24;
+  --card-border: rgba(255,255,255,0.08);
+  --shadow: 0 2px 10px rgba(0,0,0,0.45);
+  --link-bg: #64B5F6;
+  --link-bg-hover: #42A5F5;
+  --overlay: rgba(0,0,0,0.65);
+}
+
+/* overrides rápidos para usar as variáveis sem refatorar tudo */
+body { background-color: var(--bg); color: var(--text); }
+.container, .card, .zoom-content { background: var(--card-bg); box-shadow: var(--shadow); }
+.card { border: 1px solid var(--card-border); }
+a { background-color: var(--link-bg); }
+a:hover { background-color: var(--link-bg-hover); }
+.loading p { color: var(--accent); }
+.spinner { border: 4px solid rgba(76,175,80,0.25); border-top-color: var(--accent); }
+.zoom-modal { background: var(--overlay); }
+
+/* barras de predição (se você adicionou) */
+.prog { background: #e9ecef; }
+[data-theme="dark"] .prog { background: #2a2f36; }
+.prog > span { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+
+/* Botão de Dark Mode (fixo no topo direito) */
+.theme-toggle{
+  position: fixed;
+  top: 12px; right: 12px;
+  z-index: 1100;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; line-height: 1;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+}
+.theme-toggle:hover{ transform: scale(1.06); }
+.theme-toggle:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Upload box compatível com dark mode */
+.upload-box {
+  background: var(--card-bg);       /* antes era #fff */
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+}
+
+/* (opcional) borda do container geral também segue o tema */
+.container {
+  border: 1px solid var(--card-border);
+}
+
+/* Botão Dark Mode perfeitamente redondo */
+.theme-toggle{
+  --btnSize: 48px;          /* ajuste aqui o tamanho */
+  inline-size: var(--btnSize);
+  block-size: var(--btnSize);
+  aspect-ratio: 1 / 1;      /* garante 1:1 */
+  padding: 0;               /* remove padding nativo */
+  border-radius: 9999px;    /* mais seguro que 50% em alguns casos */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--btnSize) * 0.45); /* tamanho do emoji */
+  line-height: 1;
+}
+
+@media (max-width: 600px){
+  .theme-toggle{ --btnSize: 44px; }
+}
+
+/* Barra do topo: logo centralizada e toggle à direita */
+.topbar{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;  /* [vazio] [logo] [toggle] */
+  align-items: center;
+  padding: max(10px, env(safe-area-inset-top)) 12px 6px 12px;
+  margin-bottom: 8px;                   /* separa do conteúdo abaixo */
+}
+.topbar .logo-wrapper{
+  grid-column: 2;
+  justify-self: center;
+  margin: 0;                            /* tira o margin antigo da logo */
+}
+.topbar .theme-toggle{
+  grid-column: 3;
+  justify-self: end;
+}
+
+/* Botão Dark Mode: estático e perfeitamente redondo */
+.theme-toggle{
+  position: static;        /* <- não segue a rolagem */
+  inset: auto;
+  z-index: auto;
+
+  --btnSize: 48px;
+  inline-size: var(--btnSize);
+  block-size: var(--btnSize);
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--btnSize) * 0.45);
+  line-height: 1;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+}
+.theme-toggle:hover{ transform: scale(1.06); }
+.theme-toggle:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (max-width: 600px){
+  .theme-toggle{ --btnSize: 44px; }  /* um pouquinho menor no mobile */
+}
+
+/* Transições suaves do tema nas superfícies principais */
+:root { --ui-transition: .35s; }
+body, .container, .card, .upload-box, .zoom-content, .topbar, .theme-toggle, .prog {
+  transition: background-color var(--ui-transition) ease,
+              color var(--ui-transition) ease,
+              border-color var(--ui-transition) ease;
+}
+
+/* Botão: garantir círculo e preparar animações */
+.theme-toggle{
+  position: static; inset: auto; z-index: auto;
+  --btnSize: 48px;
+  inline-size: var(--btnSize); block-size: var(--btnSize); aspect-ratio: 1/1;
+  padding: 0; border-radius: 9999px; overflow: hidden; /* overflow p/ ripple */
+  display: grid; place-items: center;
+}
+
+/* Cross-fade ☀️↔🌙 */
+.theme-toggle .icon { position: relative; width: 1em; height: 1em; }
+.theme-toggle .sun, .theme-toggle .moon{
+  position: absolute; inset: 0; display: grid; place-items: center;
+  transition: opacity .22s ease, transform .30s ease;
+}
+[data-theme="light"] .theme-toggle .sun{ opacity: 1; transform: rotate(0) scale(1); }
+[data-theme="light"] .theme-toggle .moon{ opacity: 0; transform: rotate(-90deg) scale(.7); }
+[data-theme="dark"]  .theme-toggle .sun{ opacity: 0; transform: rotate(90deg)  scale(.7); }
+[data-theme="dark"]  .theme-toggle .moon{ opacity: 1; transform: rotate(0)   scale(1); }
+
+/* Ripple no clique */
+.theme-toggle::after{
+  content:""; position: absolute; inset: 0; border-radius: inherit;
+  background: currentColor; opacity: 0; transform: scale(0.6);
+}
+.theme-toggle.ripple::after{ animation: ripple .45s ease-out; }
+@keyframes ripple{
+  0%{ opacity:.22; transform: scale(0.6); }
+  100%{ opacity:0;  transform: scale(1.45); }
+}
+
+/* “Boop” (leve bounce/tilt) no clique */
+.theme-toggle.boop{ animation: boop .34s cubic-bezier(.22,1,.36,1); }
+@keyframes boop{
+  30%{ transform: scale(1.08) rotate(-6deg); }
+  60%{ transform: scale(.98)  rotate(2deg); }
+  100%{ transform: scale(1)    rotate(0); }
+}
+
+/* Menor no mobile se quiser */
+@media (max-width: 600px){ .theme-toggle{ --btnSize: 44px; } }
+
+/* Respeitar quem prefere menos animação */
+@media (prefers-reduced-motion: reduce){
+  .theme-toggle, .theme-toggle * { transition: none !important; animation: none !important; }
+}
+
+/* Centralização visual do ícone do toggle (corrige offset do emoji) */
+.theme-toggle{
+  /* ajuste fino: mexa 0–1.5px se quiser */
+  --icon-nudge-x: -2px;
+  --icon-nudge-y: 0.8px;   /* em Windows costuma precisar ~0.5–1px pra baixo */
+}
+
+.theme-toggle .icon{
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.theme-toggle .sun,
+.theme-toggle .moon{
+  line-height: 1;
+  transform-origin: 50% 50%;
+  display: grid;
+  place-items: center;
+}
+
+/* aplica o nudge + as animações que você já usa */
+[data-theme="light"] .theme-toggle .sun  { opacity:1; transform: translate(var(--icon-nudge-x), var(--icon-nudge-y)) rotate(0)      scale(1);  }
+[data-theme="light"] .theme-toggle .moon { opacity:0; transform: translate(var(--icon-nudge-x), var(--icon-nudge-y)) rotate(-90deg) scale(.7); }
+
+[data-theme="dark"]  .theme-toggle .sun  { opacity:0; transform: translate(var(--icon-nudge-x), var(--icon-nudge-y)) rotate(90deg)  scale(.7); }
+[data-theme="dark"]  .theme-toggle .moon { opacity:1; transform: translate(var(--icon-nudge-x), var(--icon-nudge-y)) rotate(0)      scale(1);  }
+
+/* garante que o toggle nunca pegue o gradiente verde */
+.theme-toggle,
+.theme-toggle:hover,
+.theme-toggle:active,
+.theme-toggle:focus {
+  background: var(--card-bg);
+  background-image: none;
+  color: var(--text);
+  border-color: var(--card-border);
+}
+
+.theme-toggle { -webkit-tap-highlight-color: transparent; }
+
+/* Rolagem suave para âncoras/scrollTo */
+html { scroll-behavior: auto; }
+
+/* wrapper no fim do resultado, alinha à direita (mude para center se preferir) */
+.to-top-container{
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 4px 0;
+}
+
+/* Botão redondo com seta */
+.btn-fab{
+  --fabSize: 48px;
+  inline-size: var(--fabSize);
+  block-size: var(--fabSize);
+  aspect-ratio: 1/1;
+  border-radius: 9999px;
+  border: none;
+  display: grid; place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .2s ease;
+  padding: 0;
+  font-size: 22px;      /* tamanho da seta */
+  line-height: 1;
+}
+.btn-fab:hover{ transform: scale(1.07); }
+.btn-fab:focus-visible{
+  outline: 2px solid var(--link-bg);
+  outline-offset: 2px;
+}
+@media (max-width: 600px){
+  .btn-fab{ --fabSize: 44px; font-size: 20px; }
+}
+
+/* animação de entrada do botão */
+.btn-fab{ opacity: 0; transform: translateY(10px); animation: fabIn .28s ease-out .15s forwards; }
+@keyframes fabIn{ to{ opacity:1; transform: translateY(0);} }
+
+/* ====== Correções de contraste no modal de zoom ====== */
+.zoom-content{
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+}
+
+/* Títulos usam a cor de destaque do tema */
+.zoom-content h2,
+.zoom-content h3{
+  color: var(--accent);
+}
+
+/* Texto dentro do modal herda a cor correta do tema */
+.zoom-content p,
+.zoom-content li,
+.zoom-content span,
+.zoom-content small,
+.zoom-content dt,
+.zoom-content dd{
+  color: var(--text);
+}
+
+/* Links visíveis nos dois temas */
+.zoom-content a{ color: var(--link-bg); }
+.zoom-content a:hover{ color: var(--link-bg-hover); }
+
+/* Botão de fechar com contraste adequado */
+.zoom-content .zoom-close{
+  color: var(--text);
+}
+.zoom-content .zoom-close:hover{
+  color: #e53935; /* mantenha ou troque por var(--link-bg) se preferir */
 }
