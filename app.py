@@ -14,16 +14,17 @@ caminho_modelo = os.path.join(base_dir, "modelo_01.keras")
 caminho_classes_json = os.path.join(base_dir, "class_index_corrigido.json")
 
 # Inicializar Flask
-app = Flask(__name__)
-
+app = Flask(__name__,
+    static_url_path='static_biovision',
+    static_folder='static'
+)
 
 db_config = {
     "host": "localhost",
     "user": "root",
     "password": "Jvt16pht",
-    "database": "biovision_especie"
+    "database": "biovision_especies"
 }
-
 
 def buscar_informacoes_especie(nome_especie):
     """Busca todas as informações da espécie no MySQL"""
@@ -79,11 +80,11 @@ def carregar_e_preparar_imagem(imagem_bytes):
     img_array = np.expand_dims(img_array, axis=0).astype("float32")
     return img_array
 
-@app.route("/")
+@app.route("/biovision/")
 def index():
     return render_template("index.html")
 
-@app.route("/classificar", methods=["POST"])
+@app.route("/biovision/classificar", methods=["POST"])
 def classificar():
     if "imagem" not in request.files:
         return jsonify({"erro": "Imagem não enviada"}), 400
@@ -123,7 +124,7 @@ def classificar():
     })
 
 # 🔹 Rota para o service worker
-@app.route("/service-worker.js")
+@app.route("/biovision/service-worker.js")
 def service_worker():
     return app.send_static_file("service-worker.js")
 
