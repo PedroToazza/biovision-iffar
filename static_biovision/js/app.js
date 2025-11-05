@@ -56,7 +56,7 @@ async function enviarImagemArquivo(file) {
 
   try {
     showLoading(true);
-    const resposta = await fetch("/classificar", {
+    const resposta = await fetch("/biovision/classificar", {
       method: "POST",
       body: formData
     });
@@ -415,7 +415,7 @@ async function enviarImagemArquivo(file) {
 
   try {
     showLoading(true);
-    const resposta = await fetch("/classificar", { method: "POST", body: formData });
+    const resposta = await fetch("/biovision/classificar", { method: "POST", body: formData });
     const dados = await resposta.json();
     exibirResultado(dados);
   } catch (err) {
