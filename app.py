@@ -15,7 +15,7 @@ caminho_classes_json = os.path.join(base_dir, "class_index_corrigido.json")
 
 # Inicializar Flask
 app = Flask(__name__,
-    static_url_path='static_biovision',
+    static_url_path='/static_biovision',
     static_folder='static'
 )
 
