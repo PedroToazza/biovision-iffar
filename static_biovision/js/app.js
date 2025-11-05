@@ -242,8 +242,9 @@ function exibirResultado(dados) {
 
   // 👉 Restante das colunas (exceto taxonomia e nomes)
   if (especie) {
-    const ignorar = new Set(["reino","filo","classe","ordem","familia","genero","especie","nomes","imagem"]);
+    const ignorar = new Set(["reino","filo","classe","ordem","familia","genero","especie","nomes","imagem","carac_reino"]);
     for (const chave in especie) {
+      if (chave === "carac_reino") continue;
       if (!ignorar.has(chave) && especie[chave]) {
         const label = colLabels[chave] || chave;
         if (chave.startsWith("im_")) {
@@ -470,3 +471,4 @@ async function enviarImagemArquivo(file) {
 
 
 });
+
