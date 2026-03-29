@@ -278,6 +278,27 @@ function getIcon(label) {
 }
 
 /* ══════════════════════════════
+   CHECK IF VALUE HAS REAL CONTENT
+   ══════════════════════════════ */
+function hasContent(val) {
+  if (val === null || val === undefined) return false;
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (trimmed === '' || trimmed === 'null' || trimmed === 'None' || trimmed === 'N/A') return false;
+    return true;
+  }
+  return Boolean(val);
+}
+
+function hasImage(val) {
+  if (!val || typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  // A real base64 image has at least ~200 chars (even a tiny 1x1 pixel)
+  if (trimmed.length < 200) return false;
+  return true;
+}
+
+/* ══════════════════════════════
    DISPLAY RESULTS
    ══════════════════════════════ */
 function exibirResultado(dados) {
@@ -293,7 +314,7 @@ function exibirResultado(dados) {
   const cards = [];
 
   // Imagem da espécie
-  if (especie && especie.imagem) {
+  if (especie && hasImage(especie.imagem)) {
     cards.push(`
       <div class="card">
         <h3>${getIcon("Imagem da Espécie")} Imagem da Espécie</h3>
@@ -313,7 +334,7 @@ function exibirResultado(dados) {
   `);
 
   // Nomes populares
-  if (especie && especie.nomes) {
+  if (especie && hasContent(especie.nomes)) {
     cards.push(`
       <div class="card">
         <h3>${getIcon("Nomes Populares")} ${colLabels["nomes"]}</h3>
@@ -327,7 +348,7 @@ function exibirResultado(dados) {
     const ordemTaxonomia = ["reino", "filo", "classe", "ordem", "familia", "genero", "especie"];
     let taxoList = "";
     ordemTaxonomia.forEach(chave => {
-      if (especie[chave]) {
+      if (hasContent(especie[chave])) {
         let valor = especie[chave];
         if (chave === "especie") valor = `<i>${valor}</i>`;
         taxoList += `<li><b>${colLabels[chave]}:</b> ${valor}</li>`;
@@ -348,16 +369,18 @@ function exibirResultado(dados) {
     const ignorar = new Set(["reino", "filo", "classe", "ordem", "familia", "genero", "especie", "nomes", "imagem", "carac_reino"]);
     for (const chave in especie) {
       if (chave === "carac_reino") continue;
-      if (!ignorar.has(chave) && especie[chave]) {
+      if (!ignorar.has(chave) && hasContent(especie[chave])) {
         const label = colLabels[chave] || chave;
         const icon = getIcon(label);
         if (chave.startsWith("im_")) {
-          cards.push(`
-            <div class="card">
-              <h3>${icon} ${label}</h3>
-              <img src="data:image/jpeg;base64,${especie[chave]}" class="result-img" alt="${label}"/>
-            </div>
-          `);
+          if (hasImage(especie[chave])) {
+            cards.push(`
+              <div class="card">
+                <h3>${icon} ${label}</h3>
+                <img src="data:image/jpeg;base64,${especie[chave]}" class="result-img" alt="${label}"/>
+              </div>
+            `);
+          }
         } else {
           cards.push(`
             <div class="card">
