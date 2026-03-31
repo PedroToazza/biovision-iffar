@@ -192,7 +192,7 @@ body {
 .nav-inner {
   max-width: 860px;
   margin: 0 auto;
-  padding: 16px 20px;
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -201,7 +201,7 @@ body {
 .nav-brand { display: flex; align-items: center; text-decoration: none; }
 
 .nav-logo {
-  height: 72px;
+  height: 56px;
   width: auto;
   object-fit: contain;
   transition: transform .2s var(--ease);
@@ -230,7 +230,7 @@ body {
   color: #fff !important;
   border-radius: var(--r-sm);
   font-size: 1em;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   transition: background .2s var(--ease), box-shadow .2s var(--ease);
   box-shadow: var(--shadow-xs);
@@ -1178,9 +1178,9 @@ a:hover { color: var(--accent-2); }
    ══════════════════════════════ */
 @media (min-width: 768px) {
   body { font-size: 17px; }
-  .nav-inner { padding: 18px 24px; }
-  .nav-logo { height: 80px; }
-  .nav-link { padding: 14px 30px; min-height: 50px; font-size: 1.05em; }
+  .nav-inner { padding: 12px 24px; }
+  .nav-logo { height: 56px; }
+  .nav-link { padding: 12px 30px; min-height: 45px; font-size: 1.02em; }
   .theme-toggle { --sz: 50px; }
   .theme-toggle .icon { width: 22px; height: 22px; }
   .hero { padding: 80px 28px 48px; }
