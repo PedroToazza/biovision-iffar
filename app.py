@@ -22,7 +22,7 @@ app = Flask(__name__,
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "Jvt16pht",
+    "password": "****",
     "database": "biovision_especie"
 }
 
