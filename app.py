@@ -8,7 +8,7 @@ import io
 import base64
 import mysql.connector  # 👈 para conectar ao MySQL
 
-# --- CONFIGURAÇÕES ---
+#CONFIGURAÇÕES
 base_dir = os.path.dirname(os.path.abspath(__file__))
 caminho_modelo = os.path.join(base_dir, "modelo_01.keras")
 caminho_classes_json = os.path.join(base_dir, "class_index_corrigido.json")
@@ -22,7 +22,7 @@ app = Flask(__name__,
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "****",
+    "password": "Jvt16pht",
     "database": "biovision_especie"
 }
 
@@ -58,7 +58,7 @@ def carregar_nomes_classes(caminho_json):
     except FileNotFoundError:
         return None
 
-# Carregar modelo treinado
+# carregar modelo treinado
 try:
     modelo = load_model(caminho_modelo)
     print("✅ Modelo carregado com sucesso!")
@@ -66,7 +66,7 @@ except Exception as e:
     print(f"Erro ao carregar o modelo: {e}")
     modelo = None
 
-# Carregar nomes das classes
+# carregar nomes das classes
 class_names = carregar_nomes_classes(caminho_classes_json)
 if class_names is None:
     print("❌ Arquivo de classes não encontrado.")
@@ -97,11 +97,11 @@ def classificar():
     if arquivo_imagem.filename == "":
         return jsonify({"erro": "Nenhuma imagem selecionada"}), 400
 
-    # Preparar imagem
+    # preparar imagem
     imagem_bytes = arquivo_imagem.read()
     img_array = carregar_e_preparar_imagem(imagem_bytes)
 
-    # Fazer predição
+    # fazer predição
     if modelo is None:
         return jsonify({"erro": "Modelo não carregado"}), 500
 
@@ -110,7 +110,7 @@ def classificar():
     confianca = float(np.max(predicao) * 100)
     keyword = class_names[classe_predita_idx]
 
-    # Buscar infos no banco
+    # buscar infos no banco
     dados_mysql = buscar_informacoes_especie(keyword)
 
     if not dados_mysql:
@@ -127,7 +127,7 @@ def classificar():
         "dados_taxon": dados_mysql
     })
 
-# 🔹 Rota para o service worker
+# 🔹 rota para o service worker
 @app.route("/biovision/service-worker.js")
 def service_worker():
     return app.send_static_file("service-worker.js")
