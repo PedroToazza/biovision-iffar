@@ -298,6 +298,16 @@ function hasImage(val) {
   return true;
 }
 
+// Auto-detecta formato da imagem pelo header base64
+function imgSrc(base64str) {
+  if (!base64str) return '';
+  if (base64str.startsWith('/9j/')) return 'data:image/jpeg;base64,' + base64str;
+  if (base64str.startsWith('iVBOR')) return 'data:image/png;base64,' + base64str;
+  if (base64str.startsWith('R0lG')) return 'data:image/gif;base64,' + base64str;
+  if (base64str.startsWith('UklG')) return 'data:image/webp;base64,' + base64str;
+  return 'data:image/jpeg;base64,' + base64str;
+}
+
 /* ══════════════════════════════
    DISPLAY RESULTS
    ══════════════════════════════ */
@@ -310,129 +320,225 @@ function exibirResultado(dados) {
     return;
   }
 
-  const especie = dados.dados_taxon;
-  const cards = [];
+  const especie = dados.dados_taxon || {};
 
-  // Imagem da espécie
-  if (especie && hasImage(especie.imagem)) {
-    cards.push(`
-      <div class="card">
-        <h3>${getIcon("Imagem da Espécie")} Imagem da Espécie</h3>
-        <img src="data:image/jpeg;base64,${especie.imagem}" class="result-img" alt="Imagem da espécie"/>
-        ${especie.especie ? `<p style="text-align:center;margin-top:8px;"><i>${especie.especie}</i></p>` : ""}
+  // ─── HEADER CARD: imagem + identificação ───
+  const headerImagem = hasImage(especie.imagem)
+    ? `<img src="${imgSrc(especie.imagem)}" class="result-header-img" alt="Imagem da espécie"/>`
+    : `<div class="result-header-img result-header-noimg">Sem imagem disponível</div>`;
+
+  const nomeCientifico = especie.especie || dados.keyword;
+  const nomesPopulares = hasContent(especie.nomes) ? especie.nomes : '';
+
+  const headerHTML = `
+    <div class="result-header card-animate">
+      <div class="result-header-imgwrap">
+        ${headerImagem}
       </div>
-    `);
-  }
-
-  // Resultado
-  cards.push(`
-    <div class="card">
-      <h2>${getIcon("Resultado da Classificação")} Resultado da Classificação</h2>
-      <p><b>Classe Prevista:</b> ${dados.keyword}</p>
-      <p><b>Confiança:</b> ${Number(dados.confidence).toFixed(2)}%</p>
-    </div>
-  `);
-
-  // Nomes populares
-  if (especie && hasContent(especie.nomes)) {
-    cards.push(`
-      <div class="card">
-        <h3>${getIcon("Nomes Populares")} ${colLabels["nomes"]}</h3>
-        <p>${especie.nomes}</p>
-      </div>
-    `);
-  }
-
-  // Taxonomia
-  if (especie) {
-    const ordemTaxonomia = ["reino", "filo", "classe", "ordem", "familia", "genero", "especie"];
-    let taxoList = "";
-    ordemTaxonomia.forEach(chave => {
-      if (hasContent(especie[chave])) {
-        let valor = especie[chave];
-        if (chave === "especie") valor = `<i>${valor}</i>`;
-        taxoList += `<li><b>${colLabels[chave]}:</b> ${valor}</li>`;
-      }
-    });
-    if (taxoList) {
-      cards.push(`
-        <div class="card">
-          <h3>${getIcon("Taxonomia")} Taxonomia</h3>
-          <ul>${taxoList}</ul>
+      <div class="result-header-info">
+        <p class="result-header-label">Espécie identificada</p>
+        <h2 class="result-header-name"><i>${nomeCientifico}</i></h2>
+        ${nomesPopulares ? `<p class="result-header-popular">${nomesPopulares}</p>` : ''}
+        <div class="result-header-confidence">
+          <span class="conf-dot"></span>
+          ${Number(dados.confidence).toFixed(1)}% de confiança
         </div>
-      `);
+      </div>
+    </div>
+  `;
+
+  // ─── TABS: monta as abas baseado no que tem dados ───
+  const tabs = [];
+
+  // Aba 1: Taxonomia (sempre tenta mostrar)
+  const ordemTaxonomia = ["reino", "filo", "classe", "ordem", "familia", "genero", "especie"];
+  const taxoItems = [];
+  ordemTaxonomia.forEach(chave => {
+    if (hasContent(especie[chave])) {
+      let valor = especie[chave];
+      if (chave === "especie") valor = `<i>${valor}</i>`;
+      taxoItems.push(`<div class="taxo-row"><span class="taxo-label">${colLabels[chave]}</span><span class="taxo-value">${valor}</span></div>`);
     }
+  });
+  if (taxoItems.length) {
+    tabs.push({
+      id: 'taxonomia',
+      label: 'Taxonomia',
+      content: `<div class="taxo-grid">${taxoItems.join('')}</div>`
+    });
   }
 
-  // Restante das colunas
-  if (especie) {
-    const ignorar = new Set(["reino", "filo", "classe", "ordem", "familia", "genero", "especie", "nomes", "imagem", "carac_reino"]);
-    for (const chave in especie) {
-      if (chave === "carac_reino") continue;
-      if (!ignorar.has(chave) && hasContent(especie[chave])) {
-        const label = colLabels[chave] || chave;
-        const icon = getIcon(label);
-        if (chave.startsWith("im_")) {
-          if (hasImage(especie[chave])) {
-            cards.push(`
-              <div class="card">
-                <h3>${icon} ${label}</h3>
-                <img src="data:image/jpeg;base64,${especie[chave]}" class="result-img" alt="${label}"/>
-              </div>
-            `);
-          }
-        } else {
-          cards.push(`
-            <div class="card">
-              <h3>${icon} ${label}</h3>
-              <p>${especie[chave]}</p>
-            </div>
-          `);
-        }
+  // Aba 2: Habitat
+  const habitatParts = [];
+  if (hasContent(especie.habitat)) habitatParts.push(`<p>${especie.habitat}</p>`);
+  if (hasImage(especie.im_habitat)) habitatParts.push(`<img src="${imgSrc(especie.im_habitat)}" class="tab-img" alt="Habitat"/>`);
+  if (habitatParts.length) {
+    tabs.push({ id: 'habitat', label: 'Habitat', content: habitatParts.join('') });
+  }
+
+  // Aba 3: Morfologia
+  const morfoParts = [];
+  if (hasContent(especie.morfologia)) morfoParts.push(`<p>${especie.morfologia}</p>`);
+  if (hasImage(especie.im_morfologia)) morfoParts.push(`<img src="${imgSrc(especie.im_morfologia)}" class="tab-img" alt="Morfologia"/>`);
+  if (morfoParts.length) {
+    tabs.push({ id: 'morfologia', label: 'Morfologia', content: morfoParts.join('') });
+  }
+
+  // Aba 4: Reprodução
+  if (hasContent(especie.reproducao)) {
+    tabs.push({ id: 'reproducao', label: 'Reprodução', content: `<p>${especie.reproducao}</p>` });
+  }
+
+  // Aba 5: Conservação
+  const consParts = [];
+  if (hasContent(especie.conservacao)) consParts.push(`<p>${especie.conservacao}</p>`);
+  if (hasImage(especie.im_conservacao)) consParts.push(`<img src="${imgSrc(especie.im_conservacao)}" class="tab-img" alt="Conservação"/>`);
+  if (consParts.length) {
+    tabs.push({ id: 'conservacao', label: 'Conservação', content: consParts.join('') });
+  }
+
+  // Aba 6: Características adicionais (filo, classe, ordem)
+  const caracParts = [];
+  const caracMap = [
+    { chave: 'carac_filo', img: 'im_filo', label: 'Filo' },
+    { chave: 'carac_classe', img: 'im_classe', label: 'Classe' },
+    { chave: 'carac_ordem', img: 'im_ordem', label: 'Ordem' }
+  ];
+  caracMap.forEach(c => {
+    if (hasContent(especie[c.chave])) {
+      caracParts.push(`<h4 class="tab-subhead">${c.label}</h4><p>${especie[c.chave]}</p>`);
+      if (hasImage(especie[c.img])) {
+        caracParts.push(`<img src="${imgSrc(especie[c.img])}" class="tab-img" alt="${c.label}"/>`);
       }
     }
+  });
+  if (caracParts.length) {
+    tabs.push({ id: 'caracteristicas', label: 'Características', content: caracParts.join('') });
   }
 
-  // Predições (top-k)
+  // Aba 7: Predições (top-k) — se vier do servidor
   if (Array.isArray(dados.topk) && dados.topk.length) {
     const items = dados.topk.map(t => `
       <li>
-        <b>${t.label}</b> — ${Number(t.confidence).toFixed(2)}%
+        <div class="pred-row"><b>${t.label}</b><span>${Number(t.confidence).toFixed(2)}%</span></div>
         <div class="prog"><span style="width:${t.confidence}%;"></span></div>
       </li>
     `).join("");
-    cards.push(`
-      <div class="card">
-        <h3>${getIcon("Predições")} Predições</h3>
-        <ul class="pred-bars">${items}</ul>
-        ${dados.aviso ? `<p style="color:#e65100;margin-top:8px;">${dados.aviso}</p>` : ""}
-      </div>
-    `);
+    tabs.push({
+      id: 'predicoes',
+      label: 'Predições',
+      content: `<ul class="pred-bars">${items}</ul>${dados.aviso ? `<p style="color:#e65100;margin-top:8px;">${dados.aviso}</p>` : ""}`
+    });
   }
 
-  // Render com stagger
-  resultadoDiv.innerHTML = "";
-  const frag = document.createDocumentFragment();
+  // ─── Monta HTML das abas ───
+  let tabsHTML = '';
+  if (tabs.length) {
+    const tabBtns = tabs.map((t, i) =>
+      `<button class="tab-btn ${i === 0 ? 'is-active' : ''}" data-tab="${t.id}">${t.label}</button>`
+    ).join('');
 
-  cards.forEach((html, i) => {
-    const tpl = document.createElement("template");
-    tpl.innerHTML = html.trim();
-    const el = tpl.content.firstElementChild;
-    el.classList.add("card-animate");
-    el.style.animationDelay = `${i * 100}ms`;
-    frag.appendChild(el);
+    const tabPanels = tabs.map((t, i) =>
+      `<div class="tab-panel ${i === 0 ? 'is-active' : ''}" data-panel="${t.id}">${t.content}</div>`
+    ).join('');
+
+    tabsHTML = `
+      <div class="result-tabs card-animate" style="animation-delay:120ms;">
+        <div class="tab-bar-wrap">
+          <div class="tab-bar">${tabBtns}</div>
+        </div>
+        <div class="tab-content">${tabPanels}</div>
+      </div>
+    `;
+  }
+
+  // ─── Render ───
+  resultadoDiv.innerHTML = headerHTML + tabsHTML;
+
+  // Liga clicks nas abas
+  const btns = resultadoDiv.querySelectorAll('.tab-btn');
+  const panels = resultadoDiv.querySelectorAll('.tab-panel');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.tab;
+      btns.forEach(b => b.classList.toggle('is-active', b === btn));
+      panels.forEach(p => p.classList.toggle('is-active', p.dataset.panel === id));
+      // Garante que a aba clicada fique visível
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
   });
 
-  resultadoDiv.appendChild(frag);
+  // Detecta overflow horizontal pra mostrar/esconder fade nas bordas
+  const tabBar = resultadoDiv.querySelector('.tab-bar');
+  const tabWrap = resultadoDiv.querySelector('.tab-bar-wrap');
+  if (tabBar && tabWrap) {
+    const updateOverflow = () => {
+      const hasRight = tabBar.scrollLeft + tabBar.clientWidth < tabBar.scrollWidth - 2;
+      const hasLeft = tabBar.scrollLeft > 2;
+      tabWrap.classList.toggle('has-overflow-right', hasRight);
+      tabWrap.classList.toggle('has-overflow-left', hasLeft);
+    };
+    tabBar.addEventListener('scroll', updateOverflow, { passive: true });
+    window.addEventListener('resize', updateOverflow);
+    // Roda uma vez depois do render
+    setTimeout(updateOverflow, 50);
+  }
 
-  const firstCard = resultadoDiv.querySelector(".card");
-  if (firstCard) { firstCard.setAttribute("tabindex", "-1"); firstCard.focus(); }
+  // Liga lightbox em todas as imagens (header + abas)
+  const headerImg = resultadoDiv.querySelector('.result-header-imgwrap img');
+  if (headerImg) {
+    headerImg.parentElement.addEventListener('click', () => openLightbox(headerImg.src));
+  }
+  resultadoDiv.querySelectorAll('.tab-img').forEach(img => {
+    img.addEventListener('click', () => openLightbox(img.src));
+  });
 
-  addBackToTopButton();
+  // Foco no header pra acessibilidade
+  const header = resultadoDiv.querySelector('.result-header');
+  if (header) { header.setAttribute('tabindex', '-1'); header.focus(); }
 
-  // Show "Nova identificação" button
   const btnNova = document.getElementById("btnNova");
   if (btnNova) btnNova.style.display = "block";
+}
+
+/* ══════════════════════════════
+   IMAGE LIGHTBOX
+   ══════════════════════════════ */
+function openLightbox(src) {
+  let lb = document.getElementById('imgLightbox');
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.id = 'imgLightbox';
+    lb.className = 'img-lightbox';
+    lb.innerHTML = `
+      <button class="img-lightbox-close" aria-label="Fechar">×</button>
+      <img src="" alt="Imagem ampliada"/>
+    `;
+    document.body.appendChild(lb);
+
+    // Click no fundo ou no botão fecha
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb || e.target.classList.contains('img-lightbox-close')) {
+        closeLightbox();
+      }
+    });
+
+    // ESC fecha
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  }
+  lb.querySelector('img').src = src;
+  lb.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('imgLightbox');
+  if (lb) {
+    lb.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
 }
 
 /* ══════════════════════════════
