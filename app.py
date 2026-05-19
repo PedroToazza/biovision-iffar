@@ -21,6 +21,7 @@ app = Flask(__name__,
 
 db_config = {
     "host": "localhost",
+    "port": "3307",
     "user": "root",
     "password": "Jvt16pht",
     "database": "biovision_especie"
