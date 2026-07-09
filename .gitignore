@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local secrets/config
+.env
+.env.*
+!.env.example
+
+# Models, datasets and generated artifacts
+models/*
+!models/README.md
+*.keras
+*.h5
+*.hdf5
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.onnx
+*.zip
+dump.sql
+/data/
+uploads/
+instance/
+/training/checkpoints/
+/training/logs/
+/training/.venv/
+/training/venv/
+/training/data/
+/training/datasets/
+
+# Logs/runtime
+*.log
+logs/
+tmp/
+temp/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
